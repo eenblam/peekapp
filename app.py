@@ -2,7 +2,7 @@
 
 import click
 import logging
-import scapy
+from scapy.all import sniff, IP, UDP
 import fileinput
 from sys import stdin, stdout
 
@@ -24,17 +24,17 @@ def cli(signatures, blacklists, ip_blacklist, log):
 @click.argument('packets', type=click.File('rb'))
 def pcap(packets):
     """
-    Performs static analysis on a PCAP format packet dump
+    Perform static analysis on a PCAP dump
     """
-    pass
+    sniff(offline=packets)
 
 @cli.command()
 @click.argument('interface', nargs=1)
 def iface(interface):
     """
-    Monitor a specific network interface in promiscuous mode
+    Monitor a specific network interface
     """
-    pass
+    sniff(iface=interface)
 
 if __name__ == '__main__':
     cli()
