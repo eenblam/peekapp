@@ -1,10 +1,7 @@
 #!/usr/bin/env python2
 
 import click
-import logging
 from scapy.all import sniff, IP, UDP
-import fileinput
-from sys import stdin, stdout
 
 @click.group()
 @click.option('--signatures', '-s', type=click.File('rb'),
