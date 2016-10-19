@@ -24,7 +24,7 @@ def cli(signatures, blacklists, ip_blacklist, log):
 @click.argument('packets', type=click.File('rb'))
 def pcap(packets):
     """
-    Monitor a PCAP format packet dump
+    Performs static analysis on a PCAP format packet dump
     """
     pass
 
