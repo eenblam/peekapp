@@ -59,8 +59,10 @@ class AggregationDrain(Drain):
                 out = self.cache_summary(key)
                 self._high_send(out)
                 del self.cache[key]
-            except ???:
-                # Uhhh...
+            except :
+                # Should I expect a KeyError?
+                # I'm more worried about exceptions from _high_send...
+                # ...don't want to delete cache entry without sending
                 continue
 
     def high_push(self, msg):
