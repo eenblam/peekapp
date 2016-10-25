@@ -8,7 +8,7 @@ MSG = namedtuple('msg', ['timestamp', 'src', 'dst', 'traffic_type',
                          'rule', 'payload', 'pkt'])
 
 def classify_pkt(pkt, traffic_type, rule=None, payload=NoPayload):
-    msg = MSG(time=pkt.time,
+    msg = MSG(timestamp=pkt.time,
             src=pkt[IP].src,
             dst=pkt[IP].dst,
             traffic_type=traffic_type,

@@ -33,10 +33,11 @@ class AggregationDrain(Drain):
         self.cache = defaultdict(list)
 
     def cache_summary(self, key):
-        '''asdf'''
+        '''TODO'''
         records = self.cache[key]
         min_time = records[0]['timestamp']
         max_time = records[-1]['timestamp']
+        #TODO Pass min and max times with records for logging elapsed time
         pass
 
     def record_expired(self, timestamp):
