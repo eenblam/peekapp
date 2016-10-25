@@ -10,13 +10,13 @@ import filters
 @click.option('--signatures', '-s', type=click.File('rb'),
         help='File listing TCP/UDP payload signatures')
 @click.option('--blacklists', '-b', type=click.File('rb'),
-        help='File listing strings triggering an alert when present in URls')
+        help='File listing strings triggering an alert when present in URLs')
 @click.option('--ip_blacklist', '-i', type=click.File('rb'),
         help='File listing IPs for which any traffic should trigger an alert')
 @click.argument('logfile', default='peekapp.log', type=click.File('wb'))
 def cli(signatures, blacklists, ip_blacklist, log):
     """
-    peekapp is a PCAP-monitoring IDS layer, which records traffic in LOG.
+    peekapp is a packet-monitoring IDS layer, which records traffic in logfile.
     """
     pass
 

@@ -1,2 +1,2 @@
 # peekapp
-peekapp is a PCAP-monitoring IDS layer.
+peekapp is a packet-monitoring IDS layer.
