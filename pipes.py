@@ -27,6 +27,7 @@ class AggregationDrain(Drain):
     '''Performs groupby and reduce on msgs and sends reduction after cooldown'''
     def __init__(self, name=None, cooldown=5):
         Drain.__init__(self, name=name)
+        self.cooldown = cooldown
 
     def high_push(self, msg):
         # aggregate, maybe alert
