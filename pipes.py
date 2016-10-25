@@ -1,6 +1,6 @@
 from scapy.all import (Drain, Sink)
 
-def FilterDrain(Drain):
+class FilterDrain(Drain):
     '''Drop packets that fail filter'''
     def __init__(self, filter, name=None):
         Drain.__init__(self, name=name)
@@ -14,7 +14,7 @@ def FilterDrain(Drain):
         if self.filter(msg):
             self._high_send(msg)
 
-def EscalationDrain(Drain):
+class EscalationDrain(Drain):
     '''Fork low pushes to push at both levels'''
     def __init__(self, name=None):
         Drain.__init__(self, name=name)
@@ -23,9 +23,9 @@ def EscalationDrain(Drain):
         self._send(msg)
         self._high_send(msg)
 
-def AggregationDrain(Drain):
+class AggregationDrain(Drain):
     '''Performs groupby and reduce on msgs and sends reduction after cooldown'''
-    def __init__(self, name=None):
+    def __init__(self, name=None, cooldown=5):
         Drain.__init__(self, name=name)
 
     def high_push(self, msg):
@@ -35,7 +35,7 @@ def AggregationDrain(Drain):
         # for implementing proper polling to dump cache after N minutes.
         pass
 
-def PortScanDrain(Drain):
+class PortScanDrain(Drain):
     '''Aggregates low messages (groupby) to track repeated SYN packets.
     Watch for single source to send SYN packets to multiple ports
     in less than TOLERANCE time.
@@ -52,7 +52,7 @@ def PortScanDrain(Drain):
         # TODO
         pass
 
-def LogSink(Sink):
+class LogSink(Sink):
     '''Formats messages and writes them to specified log file'''
     def __init__(self, logfile=None, name=None):
         Sink.__init__(self, name=name)
@@ -63,7 +63,7 @@ def LogSink(Sink):
         # Write to log file specified at runtime
         pass
 
-def AlertSink(Sink):
+class AlertSink(Sink):
     '''Formats alerts and writes them to stdout'''
     def __init__(self, name=None):
         Sink.__init__(self, name=name)
