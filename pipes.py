@@ -1,4 +1,5 @@
 from scapy.all import (Drain, Sink, NoPayload)
+from collections import defaultdict
 
 # Drains
 class FilterDrain(Drain):
@@ -29,12 +30,7 @@ class AggregationDrain(Drain):
     def __init__(self, name=None, cooldown=5):
         Drain.__init__(self, name=name)
         self.cooldown = cooldown
-
-        self.cache = {}
-
-    def cache(self, pkt):
-        '''Format pkt and add to internal cache'''
-        pass
+        self.cache = defaultdict(list)
 
     def cache_summary(self, key):
         '''asdf'''
@@ -75,7 +71,7 @@ class AggregationDrain(Drain):
         if key not in self.cache.keys():
             self._high_send(msg)
 
-        self.cache(msg)
+        self.cache[key].append(msg)
 
         #NOTE: The cache is only polled on receipt of a new packet...
         # ...not when a particular source's cooldown has expired.
