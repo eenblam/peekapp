@@ -1,5 +1,22 @@
-from scapy.all import (Drain, Sink)
+from scapy.all import (Drain, Sink, NoPayload)
 
+# Message formatters / classifiers
+from collections import namedtuple
+#TODO Add 'rule' field to MSG to identify what was matched on
+MSG = namedtuple('msg', ['timestamp', 'src', 'dst', 'type',
+                         'payload', 'pkt'])
+
+def classify_pkt(pkt, traffic_type, rule=None, payload):
+    msg = MSG(time=pkt.time,
+            src=pkt[IP].src,
+            dst=pkt[IP].dst,
+            type=traffic_type,
+            rule=rule,
+            payload=payload,
+            pkt=pkt)
+    return msg
+
+# Drains
 class FilterDrain(Drain):
     '''Drop packets that fail filter'''
     def __init__(self, filter, name=None):
@@ -29,12 +46,56 @@ class AggregationDrain(Drain):
         Drain.__init__(self, name=name)
         self.cooldown = cooldown
 
-    def high_push(self, msg):
-        # aggregate, maybe alert
-        # Wes suggests polling only on new packet.
-        # I guess I can start there and file an issue
-        # for implementing proper polling to dump cache after N minutes.
+        self.cache = {}
+
+    def cache(self, pkt):
+        '''Format pkt and add to internal cache'''
         pass
+
+    def cache_summary(self, key):
+        '''asdf'''
+        records = self.cache[key]
+        min_time = records[0]['timestamp']
+        max_time = records[-1]['timestamp']
+        pass
+
+    def record_expired(self, timestamp):
+        '''Determine if timestamp's cooldown has expired'''
+        #TODO Fiddle with datetime.datetime.now, self.cooldown, and timestamp
+        pass
+
+    def flush(self):
+        '''Summarize, send, and drop cached packets beyond cooldown'''
+        # Get (key, msg) for flushables
+        #TODO Clean up cooldown check as records are implemented
+        flushables = ((key, records) for key, records in self.cache.items()
+                        if self.record_expired(records[0]['timestamp']))
+
+        flushables = (key for key, records in self.cache.items()
+                        if self.record_expired(records[0]['timestamp']))
+        for key in flushables:
+            try:
+                out = self.cache_summary(key)
+                self._high_send(out)
+                del self.cache[key]
+            except ???:
+                # Uhhh...
+                continue
+
+    def high_push(self, msg):
+        src = msg.src
+        dst = msg.dst
+        msg_type = msg.type
+        key = (src, dst, msg_type)
+
+        if key not in self.cache.keys():
+            self._high_send(msg)
+
+        self.cache(msg)
+
+        #NOTE: The cache is only polled on receipt of a new packet...
+        # ...not when a particular source's cooldown has expired.
+        self.flush()
 
 class PortScanDrain(Drain):
     '''Aggregates low messages (groupby) to track repeated SYN packets.
@@ -61,8 +122,18 @@ class LogSink(Sink):
 
     def push(self, msg):
         # Clean up message
+        try:
+            # Get necessary fields from message
+            # timestamp, direction, src, dst, type, payload
+            # Format to output string
+            out = ''
+        except KeyError: # AttributeError?
+            # Uh-oh! Message wasn't formed correctly.
+            # Write event to app log.
+            pass
         # Write to log file specified at runtime
-        pass
+        with open(logfile, 'a') as f:
+            f.write(out)
 
 class AlertSink(Sink):
     '''Formats alerts and writes them to stdout'''
