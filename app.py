@@ -4,7 +4,7 @@ import click
 from scapy.all import (SniffSource, RdpcapSource,
                     IP, UDP,
                     PipeEngine)
-from peekapp import filters, pipes
+from peekapp import filters, pipes, blacklist
 
 @click.group()
 @click.option('--signatures', '-s', type=click.File('rb'),
