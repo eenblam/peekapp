@@ -1,5 +1,6 @@
 from scapy.all import (Drain, Sink, NoPayload)
 from collections import defaultdict
+import time
 
 # Drains
 class FilterDrain(Drain):
@@ -29,47 +30,51 @@ class AggregationDrain(Drain):
     '''Performs groupby and reduce on msgs and sends reduction after cooldown'''
     def __init__(self, name=None, cooldown=5):
         Drain.__init__(self, name=name)
-        self.cooldown = cooldown
+        self.cooldown = cooldown * 60 #TODO Document arguments. Expect minutes.
         self.cache = defaultdict(list)
 
     def cache_summary(self, key):
         '''TODO'''
+        src, dst, traffic_type = key
         records = self.cache[key]
-        min_time = records[0]['timestamp']
-        max_time = records[-1]['timestamp']
+        #TODO Convert timestamps to datetime
+        min_time = records[0].timestamp
+        max_time = records[-1].timestamp
+        count = len(records)
         #TODO Pass min and max times with records for logging elapsed time
-        pass
+
+        # Top-notch NLP here
+        plurality = 's' if len(records) > 1 else ''
+        alert = '[{}] {} packet{} between {} and {}'.format(traffic_type,
+                    pkt_count, plurality, min_time, max_time)
+        payloads = [record.payload for record in records
+                    if type(payload) is not NoPayload]
+        # "if payload" *might* be faster, but this is more explicit
+
+        payload_dump = '\n\t' + '\n\t'.join(payloads) if payloads else ''
+
+        return alert + payload_dump
 
     def record_expired(self, timestamp):
         '''Determine if timestamp's cooldown has expired'''
-        #TODO Fiddle with datetime.datetime.now, self.cooldown, and timestamp
-        pass
+        return self.cooldown < time.time() - timestamp
 
     def flush(self):
         '''Summarize, send, and drop cached packets beyond cooldown'''
-        # Get (key, msg) for flushables
-        #TODO Clean up cooldown check as records are implemented
-        flushables = ((key, records) for key, records in self.cache.items()
-                        if self.record_expired(records[0]['timestamp']))
-
         flushables = (key for key, records in self.cache.items()
-                        if self.record_expired(records[0]['timestamp']))
+                        if self.record_expired(records[0].timestamp))
+
         for key in flushables:
-            try:
-                out = self.cache_summary(key)
-                self._high_send(out)
-                del self.cache[key]
-            except :
-                # Should I expect a KeyError?
-                # I'm more worried about exceptions from _high_send...
-                # ...don't want to delete cache entry without sending
-                continue
+            #TODO Should I expect a KeyError?
+            # I'm most worried about exceptions from _high_send...
+            # (don't want to delete cache entry without sending)
+
+            out = self.cache_summary(key)
+            self._high_send(out)
+            del self.cache[key]
 
     def high_push(self, msg):
-        src = msg.src
-        dst = msg.dst
-        msg_type = msg.type
-        key = (src, dst, msg_type)
+        key = (msg.src, msg.dst, msg.traffic_type)
 
         if key not in self.cache.keys():
             self._high_send(msg)
@@ -104,19 +109,13 @@ class LogSink(Sink):
         self.logfile = logfile
 
     def push(self, msg):
-        # Clean up message
-        try:
-            # Get necessary fields from message
-            # timestamp, direction, src, dst, type, payload
-            # Format to output string
-            out = ''
-        except KeyError: # AttributeError?
-            # Uh-oh! Message wasn't formed correctly.
-            # Write event to app log.
-            pass
-        # Write to log file specified at runtime
-        with open(logfile, 'a') as f:
-            f.write(out)
+        #TODO Convert timestamp to datetime
+        if type(msg.payload) is NoPayload:
+            log = ' '.join(msg[:-2])
+        else:
+            log = ' '.join(msg[:-1])
+
+        self.logfile.write(log.encode('string_escape'))
 
 class AlertSink(Sink):
     '''Formats alerts and writes them to stdout'''

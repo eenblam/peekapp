@@ -10,39 +10,22 @@ class Blacklist(object):
         self.signatures = []
 
         if domain_file is not None:
-            self.load_signatures(domain_file)
+            self.domains = [line.strip('\n') for line in domain_file]
 
         if URL_file is not None:
-            self.load_URL_blacklist(URL_file)
+            self.URLs = [line.strip('\n') for line in URL_file]
 
         if IP_file is not None:
-            self.load_IP_blacklist(IP_file)
+            self.IP = [line.strip('\n') for line in IP_file]
 
         if signature_file is not None:
-            self.load_signatures(signature_file)
-
-    def load_domain_blacklist(self, filename):
-        with open(filename, 'r') as f:
-            self.domains = [line.strip('\n') for line in f]
-
-    def load_signatures(self, filename):
-        with open(filename, 'r') as f:
             # decode('string_escape') enables the user to write
             # hex characters as plaintext
             #TODO Be sure to document that the escaped x is necessary! \xHH
             lines = [line.strip('\n').decode('string_escape')
-                    for line in f]
-        self.signatures = lines
+                    for line in signature_file]
+            self.signatures = lines
 
-    def load_URL_blacklist(self, filename):
-        with open(filename, 'r') as f:
-            self.URLs = [line.strip('\n') for line in f]
-
-    def load_IP_blacklist(self, filename):
-        with open(filename, 'r') as f:
-            self.IPs = [line.strip('\n') for line in f]
-
-#def classify_pkt(pkt, traffic_type, rule=None, payload=NoPayload):
     def filter_by_domains(self, pkt):
         # Assume pkt is of correct format
         domain = pkt[DNSQR].qname
@@ -61,7 +44,6 @@ class Blacklist(object):
     def filter_by_signatures(self, pkt):
         #TODO get payload of pkt
         if match:
-            #rule_escaped = rule.encode('string_escape')
             return classify_pkt(pkt, 'ILLEGAL_SIGNATURE', rule=rule)
         return None
 
