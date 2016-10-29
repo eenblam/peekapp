@@ -1,10 +1,7 @@
 #!/usr/bin/env python2
 
 import click
-from scapy.all import (SniffSource, RdpcapSource,
-                    IP, UDP,
-                    TransformDrain, PipeEngine,
-                    in6_getifaddr)
+from scapy.all import (sniff, in6_getifaddr)
 
 from peekapp import filters
 from peekapp.blacklist import Blacklist
@@ -39,18 +36,19 @@ def cli(ctx, domain_blacklist, url_blacklist,
     ctx.obj['logfile'] = logfile
 
 @cli.command()
-#@click.argument('packets', type=click.File('rb'))
-@click.argument('packets', type=click.File('rb', lazy=True))
+@click.argument('packets', type=click.File('rb'))
 @click.pass_context
 def pcap(ctx, packets):
     """
     Perform static analysis on a PCAP dump
     """
-    #TODO RdpcapSource expects filename, not file handle...
-    #  ...might want to rewrite the packets argument to just accept a string
-    filename = packets.name
-    sniffer = RdpcapSource(fname=filename, name='Sniffer')
-    main(ctx=ctx, source=sniffer)
+
+    #filename = packets.name
+    callback = main(ctx)
+    try:
+        sniff(offline=packets, prn=callback)
+    except KeyboardInterrupt:
+        click.echo('\n\tHalting on keyboard interrupt.')
 
 @cli.command()
 @click.argument('interface', nargs=1)
@@ -73,58 +71,51 @@ def iface(ctx, interface):
                 .format('\n\t'.join(interfaces)))
         sys.exit(1)
 
-    sniffer = SniffSource(iface=interface, name='Sniffer')
-    main(ctx=ctx, source=sniffer)
+    callback = main(ctx)
+    try:
+        sniff(iface=interface, prn=callback.push)
+    except KeyboardInterrupt:
+        click.echo('\n\tHalting on keyboard interrupt.')
 
-def main(ctx, source):
+def main(ctx):
     # Plumbing
     blacklist = ctx.obj['blacklist']
 
-    escalator = EscalationDrain(name='Escalation of logs to Alert level')
-    aggregator = AggregationDrain(name='Alert-level aggregator')
-    alert_sink = AlertSink(name='Alert sink')
-    log_sink = LogSink(logfile=ctx.obj['logfile'], name='Log sink')
+    source = Source()
+    fork = Pipe()
+    log_sink = LogSink(logfile=ctx.obj['logfile'])
+    #alert_buffer = AlertBuffer()
+    #alert_sink = Sink(click.echo)
 
-    escalator > log_sink
-    #escalator >> aggregator >> alert_sink
+    fork > log_sink
+    #fork > alert_buffer > alert_sink
 
-    #TODO DNS domain blacklists from config
+    """Establish pipelines"""
     if blacklist.domains:
-        dns_requests = FilterDrain(filter=filters.is_DNS_query,
-                                name='UDP DNS Requests')
-        dns_msgs = TransformDrain(f=blacklist.filter_by_domains,
-                                name='UDP DNS packets')
-        dns_bad = FilterDrain(filter=lambda x: x is not None,
-                                name='Keep DNS packets for blacklisted domains')
-        source > dns_requests > dns_msgs > dns_bad  > escalator
+        dns_requests = Pipe(filter=filters.is_DNS_query,
+                transform=blacklist.filter_by_domains)
+        dns_bad = Pipe(filter=lambda x: x is not None)
+        source > dns_requests > dns_bad > fork
 
     if blacklist.IPs:
-        ip_blacklist = FilterDrain()
+        ip_blacklist = Pipe()
         #source > ip_blacklist > escalator
 
     if blacklist.URLs:
-        http_requests = FilterDrain()
-        #bad_http = FilterDrain()
+        http_requests = Pipe()
+        #bad_http = Pipe()
         #source > http_requests > bad_http > escalator
 
     if blacklist.signatures:
-        payload_signatures = FilterDrain(filter=filters.has_transport_payload,
-                                        name='Has transport layer payload')
-        #bad_payload = FilterDrain()
+        payload_signatures = Pipe(filter=filters.has_transport_payload)
+        #bad_payload = Pipe()
         #source > payload_signatures > bad_payload > escalator
 
     #TODO All of port scan detection
-    #port_scan_detector = PortScanDrain()
+    #port_scan_detector = PortScanBuffer()
     #source > port_scan_detector > escalator
 
+    return source
 
-    #TODO DEBUG with logger
-    try:
-        engine = PipeEngine(source)
-        engine.start()
-    except KeyboardInterrupt:
-        click.echo('\n\tPeekapp exiting on keyboard interrupt.')
-        engine.stop()
- 
 if __name__ == '__main__':
     cli(obj={})
