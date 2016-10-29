@@ -44,14 +44,7 @@ class LogSink(_ConnectorLogic):
         self.logfile = logfile
 
     def push(self, msg):
-        #TODO Convert timestamp to datetime
-        #if type(msg.payload) is NoPayload:
-        #    log = ' '.join(str(x) for x in msg[:-2])
-        #else:
-        #    log = ' '.join(str(x) for x in msg[:-1])
-
-        #self.logfile.write(log.encode('string_escape') + '\n')
-        self.logfile.write(loggify_msg(msg))
+        self.logfile.write(loggify_msg(msg) + '\n')
 
 class AlertBuffer(Pipe):
     """Performs groupby and reduce on msgs and sends reduction after cooldown"""
@@ -62,7 +55,6 @@ class AlertBuffer(Pipe):
 
     def cache_summary(self, key):
         """TODO"""
-        #TODO Need to skip first element of cache, since it's only cached for its timestamp!
         src, dst, traffic_type = key
         old_records = self.cache[key]
         #TODO Convert timestamps to datetime
@@ -72,7 +64,7 @@ class AlertBuffer(Pipe):
         records = old_records[1:]
         pkt_count = len(records)
 
-        if not count:
+        if not pkt_count:
             # Cache cooldown exceeded with no new records
             return
 
@@ -80,10 +72,13 @@ class AlertBuffer(Pipe):
 
         # Top-notch NLP here
         plurality = 's' if len(records) > 1 else ''
-        alert = '[{}] {} packet{} between {} and {}'.format(
-                    traffic_type, pkt_count, plurality, min_time, max_time)
+        alert = '{} {} packet{} from {} to {} between {} and {}'.format(
+                    traffic_type, pkt_count, plurality,
+                    src, dst,
+                    min_time, max_time)
         payloads = [record.payload for record in records
-                    if type(payload) is not NoPayload]
+                    if type(record.payload) is not NoPayload
+                    and record.payload is not NoPayload()]
         # "if payload" *might* be faster, but this is more explicit
 
         payload_dump = '\n\t' + '\n\t'.join(payloads) if payloads else ''
@@ -106,16 +101,20 @@ class AlertBuffer(Pipe):
             out = self.cache_summary(key)
             if out:
                 # Out is a nonempty string
-                self.send(out)
+                self._send(out)
 
             del self.cache[key]
+
+    def _send(self, msg):
+        for s in self.sinks:
+            s.push(msg)
 
     def push(self, msg):
         key = (msg.src, msg.dst, msg.traffic_type)
 
         if key not in self.cache.keys():
-            for s in self.sinks:
-                s.push(msg)
+            #self._send(msg)
+            self._send(loggify_msg(msg))
 
         self.cache[key].append(msg)
 

@@ -41,7 +41,7 @@ class Blacklist(object):
             match_equalities = (x==y for x,y in matched_parts)
             match = reduce(lambda x,y: x and y, match_equalities)
             if match:
-                return classify_pkt(pkt, 'ILLEGAL_DOMAIN', payload=NoPayload(), rule=rule)
+                return classify_pkt(pkt, 'ILLEGAL_DOMAIN', payload=domain, rule=rule)
         return None
 
     def filter_by_signatures(self, pkt):

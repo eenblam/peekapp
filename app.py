@@ -86,11 +86,11 @@ def main(blacklist, logfile):
     source = Source()
     fork = Pipe()
     log_sink = LogSink(logfile=logfile)
-    #alert_buffer = AlertBuffer()
-    #alert_sink = Sink(click.echo)
+    alert_buffer = AlertBuffer(cooldown=0.5)
+    alert_sink = Sink(click.echo)
 
     fork > log_sink
-    #fork > alert_buffer > alert_sink
+    fork > alert_buffer > alert_sink
 
     # Establish pipelines
     if blacklist.domains:

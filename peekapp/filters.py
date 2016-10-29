@@ -1,5 +1,5 @@
 # peekapp/filters.py
-from scapy.all import DNSQR
+from scapy.all import DNSQR, DNSRR
 
 def with_layers(*layers):
     """Accept packet if it has any of the listed layers"""
@@ -27,7 +27,7 @@ def with_signatures(*signatures):
     pass
 
 def is_DNS_query(pkt):
-    return pkt.haslayer(DNSQR)
+    return pkt.haslayer(DNSQR) and not pkt.haslayer(DNSRR)
 
 def has_transport_payload(pkt):
     #TODO Check not isinstance(pkt[2].payload, scapy.packet.NoPayload)
