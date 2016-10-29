@@ -1,6 +1,8 @@
 from collections import defaultdict
 import time
 from scapy.pipetool import _ConnectorLogic
+from scapy.all import NoPayload
+from peekapp.classifiers import loggify_msg
 
 # I need to reimplement pipetool, but without threading or source tracking
 # The former keeps blowing up in Scapy, and the latter isn't needed here
@@ -43,12 +45,13 @@ class LogSink(_ConnectorLogic):
 
     def push(self, msg):
         #TODO Convert timestamp to datetime
-        if type(msg.payload) is NoPayload:
-            log = ' '.join(msg[:-2])
-        else:
-            log = ' '.join(msg[:-1])
+        #if type(msg.payload) is NoPayload:
+        #    log = ' '.join(str(x) for x in msg[:-2])
+        #else:
+        #    log = ' '.join(str(x) for x in msg[:-1])
 
-        self.logfile.write(log.encode('string_escape'))
+        #self.logfile.write(log.encode('string_escape') + '\n')
+        self.logfile.write(loggify_msg(msg))
 
 class AlertBuffer(Pipe):
     """Performs groupby and reduce on msgs and sends reduction after cooldown"""

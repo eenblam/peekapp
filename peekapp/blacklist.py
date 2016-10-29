@@ -1,3 +1,6 @@
+from scapy.all import DNSQR, NoPayload
+from classifiers import classify_pkt
+
 class Blacklist(object):
     def __init__(self, domain_file=None,
                 URL_file=None,
@@ -28,7 +31,7 @@ class Blacklist(object):
 
     def filter_by_domains(self, pkt):
         # Assume pkt is of correct format
-        domain = pkt[DNSQR].qname
+        domain = pkt[DNSQR].qname.rstrip('.')
         domain_parts = domain.split('.')[::-1]
         # Forward pkt, classified by first rule matched
         for rule in self.domains:
@@ -38,8 +41,8 @@ class Blacklist(object):
             match_equalities = (x==y for x,y in matched_parts)
             match = reduce(lambda x,y: x and y, match_equalities)
             if match:
-                return classify_pkt(pkt, 'ILLEGAL_DOMAIN', rule=rule)
-            return None
+                return classify_pkt(pkt, 'ILLEGAL_DOMAIN', payload=NoPayload(), rule=rule)
+        return None
 
     def filter_by_signatures(self, pkt):
         #TODO get payload of pkt

@@ -1,5 +1,5 @@
-from scapy.pipetool import Drain
-import filters
+# peekapp/filters.py
+from scapy.all import DNSQR
 
 def with_layers(*layers):
     """Accept packet if it has any of the listed layers"""

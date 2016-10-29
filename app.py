@@ -44,14 +44,14 @@ def pcap(ctx, packets):
     """
 
     #filename = packets.name
-    callback = main(ctx)
+    source = main(ctx)
     try:
-        sniff(offline=packets, prn=callback)
+        sniff(offline=packets, prn=source.push)
     except KeyboardInterrupt:
         click.echo('\n\tHalting on keyboard interrupt.')
 
 @cli.command()
-@click.argument('interface', nargs=1)
+@click.argument('interface', nargs=1, type=str)
 @click.pass_context
 def iface(ctx, interface):
     """
@@ -71,26 +71,28 @@ def iface(ctx, interface):
                 .format('\n\t'.join(interfaces)))
         sys.exit(1)
 
-    callback = main(ctx)
+    source = main(blacklist=ctx.obj['blacklist'],
+            logfile=ctx.obj['logfile'])
     try:
-        sniff(iface=interface, prn=callback.push)
+        # For some reason, click calls this function a second time...
+        # ...but with interface as <type 'unicode'>...
+        # ...which breaks struct.pack("16s16x", iff) in scapy/arch/common.py
+        sniff(iface=str(interface), prn=source.push)
     except KeyboardInterrupt:
         click.echo('\n\tHalting on keyboard interrupt.')
 
-def main(ctx):
+def main(blacklist, logfile):
     # Plumbing
-    blacklist = ctx.obj['blacklist']
-
     source = Source()
     fork = Pipe()
-    log_sink = LogSink(logfile=ctx.obj['logfile'])
+    log_sink = LogSink(logfile=logfile)
     #alert_buffer = AlertBuffer()
     #alert_sink = Sink(click.echo)
 
     fork > log_sink
     #fork > alert_buffer > alert_sink
 
-    """Establish pipelines"""
+    # Establish pipelines
     if blacklist.domains:
         dns_requests = Pipe(filter=filters.is_DNS_query,
                 transform=blacklist.filter_by_domains)
