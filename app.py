@@ -7,6 +7,7 @@ from peekapp import filters
 from peekapp.blacklist import Blacklist
 from peekapp.pipes import *
 from peekapp.alerts import *
+from peekapp.classifiers import loggify
 
 @click.group(invoke_without_command=True)
 @click.option('--domain-blacklist', '-d', type=click.File('r'),
@@ -86,6 +87,7 @@ def main(blacklist, logfile):
     # Plumbing
     source = Source()
     fork = Pipe()
+    log_formatter = Pipe(transform=lambda log: loggify(log) + '\n')
     log_sink = LogSink(logfile=logfile)
     alert_pool = PacketBuffer(timeout=0.5)
     alert_formatter = Pipe(transform=summarize_pretty)
