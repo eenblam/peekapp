@@ -16,14 +16,19 @@ class Source(_ConnectorLogic):
             s.push(msg)
 
 class Pipe(_ConnectorLogic):
-    def __init__(self, filter=None, transform=None):
+    def __init__(self, filter=None, transform=None, push_none=False):
         _ConnectorLogic.__init__(self)
         self.filter = filter if filter is not None else lambda _: True
         self.transform = transform
+        self._push_none = push_none
 
     def push(self, msg):
         if self.filter(msg):
             out = self.transform(msg) if self.transform is not None else msg
+
+            if not self._push_none and out is None:
+                return
+
             for s in self.sinks:
                 s.push(out)
 

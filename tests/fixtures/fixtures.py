@@ -9,11 +9,10 @@ def dns_pipeline():
         blacklist = Blacklist(domain_file=domains)
 
     source = Source()
-    dns_requests = Pipe(filter=filters.is_DNS_query,
+    bad_dns = Pipe(filter=filters.is_DNS_query,
             transform = blacklist.filter_by_domains)
-    dns_bad = Pipe(filter=lambda x: x is not None)
-    source > dns_requests > dns_bad
-    return source, dns_bad
+    source > bad_dns
+    return source, bad_dns
 
 @pytest.fixture
 def ip_pipeline():
@@ -21,7 +20,6 @@ def ip_pipeline():
         blacklist = Blacklist(IP_file=ips)
 
     source = Source()
-    bad_ip_or_none = Pipe(transform=blacklist.filter_by_IP)
-    bad_ips = Pipe(filter=lambda x: x is not None)
-    source > bad_ip_or_none > bad_ips
+    bad_ips = Pipe(transform=blacklist.filter_by_IP)
+    source > bad_ips
     return source, bad_ips
