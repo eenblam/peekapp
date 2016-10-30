@@ -103,21 +103,22 @@ def main(blacklist, logfile):
 
     if blacklist.IPs:
         ip_blacklist = Pipe()
-        #source > ip_blacklist > escalator
+        #source > ip_blacklist > fork
 
     if blacklist.URLs:
         http_requests = Pipe()
         #bad_http = Pipe()
-        #source > http_requests > bad_http > escalator
+        #source > http_requests > bad_http > fork
 
     if blacklist.signatures:
-        payload_signatures = Pipe(filter=filters.has_transport_payload)
-        #bad_payload = Pipe()
-        #source > payload_signatures > bad_payload > escalator
+        payload_signatures = Pipe(filter=filters.has_transport_payload,
+                transform=blacklist.filter_by_signatures)
+        bad_payloads = Pipe(filter=lambda x: x is not None)
+        source > payload_signatures > bad_payloads > fork
 
     #TODO All of port scan detection
     #port_scan_detector = PortScanBuffer()
-    #source > port_scan_detector > escalator
+    #source > port_scan_detector > fork
 
     return source
 

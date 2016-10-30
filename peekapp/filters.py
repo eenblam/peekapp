@@ -23,11 +23,14 @@ def with_destinations(*destinations):
     pass
 
 def with_signatures(*signatures):
-    """Keep only packets identifiable with specific signatures"""
+    """Keep only packets bearing specific signatures in their payloads"""
     pass
 
 def is_DNS_query(pkt):
     return pkt.haslayer(DNSQR) and not pkt.haslayer(DNSRR)
+
+def is_TCP_UDP(pkt):
+    return pkt.haslayer(TCP) or pkt.haslayer(TCP)
 
 def has_transport_payload(pkt):
     #TODO Check not isinstance(pkt[2].payload, scapy.packet.NoPayload)

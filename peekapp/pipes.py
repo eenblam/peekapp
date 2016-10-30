@@ -37,7 +37,7 @@ class Sink(_ConnectorLogic):
 class LogSink(_ConnectorLogic):
     """Formats messages and writes them to specified log file
 
-    ::log_file:: handle to open log file
+    :param log_file: handle to open log file
     """
     def __init__(self, logfile=None):
         _ConnectorLogic.__init__(self)
