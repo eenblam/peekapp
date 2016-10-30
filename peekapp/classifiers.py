@@ -1,4 +1,4 @@
-# classifiers.py
+# peekapp/classifiers.py
 
 # Message formatters / classifiers
 from scapy.all import NoPayload, IP

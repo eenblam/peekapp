@@ -1,3 +1,5 @@
+# peekapp/alerts.py
+
 from peekapp.pipes import *
 
 class AlertBuffer(object):
