@@ -1,7 +1,7 @@
 # peekapp/blacklist.py
 
 from scapy.all import DNSQR, NoPayload, IP, TCP, UDP
-from classifiers import classify_pkt
+from util import classify_pkt
 
 class Blacklist(object):
     def __init__(self, domain_file=None,

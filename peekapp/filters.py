@@ -31,12 +31,13 @@ def is_DNS_query(pkt):
     return pkt.haslayer(DNSQR) and not pkt.haslayer(DNSRR)
 
 def is_TCP_UDP(pkt):
-    return pkt.haslayer(TCP) or pkt.haslayer(TCP)
+    return pkt.haslayer(TCP) or pkt.haslayer(UDP)
 
 def has_transport_payload(pkt):
     #TODO Check not isinstance(pkt[2].payload, scapy.packet.NoPayload)
     try:
+        return validate_payload(pkt[2].payload)
         return not isinstance(pkt[2].payload, scapy.packet.NoPayload)
-    except IndexError:
+    except IndexError, AttributeError:
         # No transport layer!
         return False

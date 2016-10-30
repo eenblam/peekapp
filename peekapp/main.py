@@ -1,5 +1,5 @@
 import click
-from peekapp import loggify, filters
+from peekapp import loggify, filters, summarize_pretty
 from peekapp.pipes import *
 from peekapp.alerts import *
 

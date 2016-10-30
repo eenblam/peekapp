@@ -4,7 +4,7 @@ import click
 
 from peekapp.alerts import *
 from peekapp.blacklist import *
-from peekapp.classifiers import *
+from peekapp.util import *
 from peekapp.filters import *
 from peekapp.pipes import *
 

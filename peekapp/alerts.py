@@ -63,34 +63,3 @@ class PacketBuffer(Pipe):
             self.cache[key].append(msg)
 
         self.flush()
-
-def summarize_pretty(buffered_pkts):
-    """Pretty output for humans, not for analysis"""
-    msgs = buffered_pkts['msgs']
-    previous = buffered_pkts['previous']
-    count = len(msgs)
-    if not previous:
-        p = msgs[0]
-    else:
-        p = previous
-
-    # Pro NLP right here
-    plurality = 's' if count > 1 else ''
-
-    what = '{} {} packet{} from {} to {}'.format(
-                p.traffic_type, count, plurality,
-                p.src, p.dst)
-
-    if previous:
-        when = ' between {} and {}'.format(p.timestamp,
-                max(msg.timestamp for msg in msgs))
-    else:
-        when = ' at {}'.format(p.timestamp)
-
-    payloads = (msg.payload for msg in msgs
-                if type(msg.payload) is not NoPayload
-                and msg.payload is not NoPayload())
-
-    if payloads:
-        return what + when + '\n\t' + '\n\t'.join(payloads)
-    return what + when
