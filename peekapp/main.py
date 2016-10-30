@@ -18,25 +18,26 @@ def main(blacklist, logfile):
 
     # Establish pipelines
     if blacklist.domains:
-        dns_requests = Pipe(filter=filters.is_DNS_query,
+        bad_dns_or_none = Pipe(filter=filters.is_DNS_query,
                 transform=blacklist.filter_by_domains)
-        dns_bad = Pipe(filter=lambda x: x is not None)
-        source > dns_requests > dns_bad > fork
+        bad_dns = Pipe(filter=lambda x: x is not None)
+        source > bad_dns_or_none > bad_dns > fork
 
     if blacklist.IPs:
-        ip_blacklist = Pipe()
-        #source > ip_blacklist > fork
+        bad_ip_or_none = Pipe(transform=blacklist.filter_by_ip)
+        bad_ips = Pipe(filter=lambda x: x is not None)
+        source > bad_ip_or_none > bad_ips > fork
 
     if blacklist.URLs:
-        http_requests = Pipe()
-        #bad_http = Pipe()
-        #source > http_requests > bad_http > fork
+        bad_http_payload_or_none = Pipe()
+        bad_http = Pipe(lambda x: x is not None)
+        #source > bad_http_payload_or_none > bad_http > fork
 
     if blacklist.signatures:
-        payload_signatures = Pipe(filter=filters.has_transport_payload,
+        bad_signature_or_none = Pipe(filter=filters.has_transport_payload,
                 transform=blacklist.filter_by_signatures)
-        bad_payloads = Pipe(filter=lambda x: x is not None)
-        source > payload_signatures > bad_payloads > fork
+        bad_payload_signatures = Pipe(filter=lambda x: x is not None)
+        source > bad_signature_or_none > bad_payload_signatures > fork
 
     #TODO All of port scan detection
     #port_scan_detector = PortScanBuffer()

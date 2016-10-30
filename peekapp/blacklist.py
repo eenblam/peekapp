@@ -1,6 +1,6 @@
 # peekapp/blacklist.py
 
-from scapy.all import DNSQR, NoPayload
+from scapy.all import DNSQR, NoPayload, IP, TCP, UDP
 from classifiers import classify_pkt
 
 class Blacklist(object):
@@ -21,7 +21,7 @@ class Blacklist(object):
             self.URLs = [line.strip('\n') for line in URL_file]
 
         if IP_file is not None:
-            self.IP = [line.strip('\n') for line in IP_file]
+            self.IPs = [line.strip('\n') for line in IP_file]
 
         if signature_file is not None:
             # decode('string_escape') enables the user to write
@@ -48,7 +48,11 @@ class Blacklist(object):
         return None
 
     def filter_by_signatures(self, pkt):
-        payload = pkt[TCP].payload.load
+        try:
+            payload = pkt[TCP].payload.load
+        except IndexError:
+            payload = NoPayload()
+
         for signature in self.signatures:
             if signature in payload:
                 return classify_pkt(pkt, 'ILLEGAL_SIGNATURE',
@@ -64,6 +68,23 @@ class Blacklist(object):
 
     def filter_by_IP(self, pkt):
         #TODO
-        if match:
-            return classify_pkt(pkt, 'ILLEGAL_IP', rule=rule)
+
+        if pkt.haslayer(UDP):
+            try:
+                payload = pkt[UDP][DNSQR].payload.load
+            except AttributeError, IndexError:
+                payload = NoPayload()
+        elif pkt.haslayer(TCP):
+            try:
+                payload = pkt[TCP].payload.load
+            except IndexError:
+                payload = NoPayload()
+        else:
+            #TODO Expand on this, but isolate this mess someplace else
+            payload = NoPayload()
+
+        src, dst = pkt[IP].src, pkt[IP].dst
+        for ip in self.IPs:
+            if ip == src or ip == dst:
+                return classify_pkt(pkt, 'ILLEGAL_IP', payload=payload, rule=ip)
         return None

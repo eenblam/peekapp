@@ -1,6 +1,5 @@
 from scapy.all import sniff
-from peekapp.pipes import Source, Pipe, Sink
-from peekapp import filters
+from peekapp.pipes import Sink
 from fixtures.fixtures import dns_pipeline
 
 # Test: Pipeline outputs expected packets and *only* expected packets
@@ -15,7 +14,6 @@ def test_dns_queries(dns_pipeline):
     msgs = sniff(offline='tests/files/icanhazip_or_pytest.pcap',
             prn=source.push, timeout=0.5)
 
-    print len(pkt_list)
     assert len(pkt_list) == 24
     last_two = (msg.payload.split('.')[-2:]
             for msg in pkt_list)
