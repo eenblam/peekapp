@@ -6,6 +6,7 @@ from scapy.all import (sniff, in6_getifaddr)
 from peekapp import filters
 from peekapp.blacklist import Blacklist
 from peekapp.pipes import *
+from peekapp.alerts import *
 
 @click.group(invoke_without_command=True)
 @click.option('--domain-blacklist', '-d', type=click.File('r'),
@@ -86,11 +87,12 @@ def main(blacklist, logfile):
     source = Source()
     fork = Pipe()
     log_sink = LogSink(logfile=logfile)
-    alert_buffer = AlertBuffer(cooldown=0.5)
+    alert_pool = PacketBuffer(timeout=0.5)
+    alert_formatter = Pipe(transform=summarize_pretty)
     alert_sink = Sink(click.echo)
 
     fork > log_sink
-    fork > alert_buffer > alert_sink
+    fork > alert_pool > alert_formatter > alert_sink
 
     # Establish pipelines
     if blacklist.domains:
