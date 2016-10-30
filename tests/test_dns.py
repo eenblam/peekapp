@@ -1,22 +1,7 @@
-import pytest
 from scapy.all import sniff
-from peekapp.blacklist import Blacklist
 from peekapp.pipes import Source, Pipe, Sink
 from peekapp import filters
-
-@pytest.fixture
-def dns_pipeline():
-    with open('tests/files/icanhazip.cfg','r') as domains:
-        blacklist = Blacklist(domain_file=domains)
-
-    source = Source()
-    dns_requests = Pipe(filter=filters.is_DNS_query,
-            transform = blacklist.filter_by_domains)
-    dns_bad = Pipe(filter=lambda x: x is not None)
-    source > dns_requests > dns_bad
-    return source, dns_bad
-
-#TODO: Fixture: Get open handle to tmp logfile
+from fixtures.fixtures import dns_pipeline
 
 # Test: Pipeline outputs expected packets and *only* expected packets
 # - Test number (48 QR, 24 not RR icanhazip.com., 316 docs.pytest.org.)
@@ -37,5 +22,3 @@ def test_dns_queries(dns_pipeline):
     joined = ('.'.join(pair) for pair in last_two)
     domains_are_correct = (domain == 'icanhazip.com' for domain in joined)
     assert all(domains_are_correct)
-
-# TODO: Test: Log format is as expected
