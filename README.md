@@ -52,6 +52,16 @@ sudo `which python` peekapp.py -l out.log -d bad_domains.cfg -s sketchy_signatur
 peekapp -l out.log -i ips_that_should_be_reserved.cfg pcap oldtraffic.pcap
 ```
 
+### Configuration
+TODO Different configuration file for each traffic type,
+with the exception of port scan detection
+
+Note that arbitrary byte sequences may be used when specifying
+a configuration file listing payload signatures.
+Nonprintable characters must be specified via their two-digit hex encoding,
+and must comply with Python specification PEP 223.
+In short, record the two-digit hex number `HH` as `\xHH`.
+
 ## Report
 ### Decision Process & Design
 My entire networking background consists of what I've learned in the course
@@ -192,3 +202,5 @@ The "secret" (and presumably deprecated) [Scapy PDF documentation](secdev.org/pr
 [Click documentation](click.pocoo.org)
 
 [PyTest documentation](docs.pytest.org)
+
+[PEP 223](python.org/dev/peps/pep-0223/)

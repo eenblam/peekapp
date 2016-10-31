@@ -25,8 +25,7 @@ class Blacklist(object):
 
         if signature_file is not None:
             # decode('string_escape') enables the user to write
-            # hex characters as plaintext
-            #TODO Be sure to document that the escaped x is necessary! \xHH
+            # arbitrary bytes in plaintext as escaped, two-digit hex
             lines = [line.strip('\n').decode('string_escape')
                     for line in signature_file]
             self.signatures = lines
@@ -88,8 +87,6 @@ class Blacklist(object):
         return None
 
     def filter_by_IP(self, pkt):
-        #TODO
-
         if pkt.haslayer(UDP):
             try:
                 payload = pkt[UDP][DNSQR].payload.load

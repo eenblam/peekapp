@@ -3,7 +3,6 @@
 # Message formatters / classifiers
 from scapy.all import NoPayload, IP
 from collections import namedtuple
-#TODO Add 'rule' field to MSG to identify what was matched on
 MSG = namedtuple('msg', ['timestamp', 'src', 'dst', 'traffic_type',
                          'rule', 'payload', 'pkt'])
 

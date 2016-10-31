@@ -30,8 +30,14 @@ class AlertBuffer(object):
 class PacketBuffer(Pipe):
     """Performs groupby and reduce on msgs and sends reduction after timeout"""
     def __init__(self, timeout=5):
+        """Creates a new PacketBuffer
+
+        :param timeout: number of minutes redundant packets are held
+        :type timeout: int or float
+        """
+
         Pipe.__init__(self)
-        self.timeout = timeout * 60 #TODO Document arguments. Expect minutes.
+        self.timeout = timeout * 60
         self.cache = {}
 
     def flushables(self):
