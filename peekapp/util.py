@@ -21,8 +21,8 @@ def loggify(msg):
     always_use = [msg.traffic_type, msg.timestamp, msg.src, msg.dst, msg.rule]
     log = ' '.join(str(field) for field in always_use)
     if not validate_payload(msg.payload):
-        return log.encode('string_escape') + ' NoPayload'
-    return (log + ' ' + str(msg.payload)).encode('string_escape')
+        return log + ' NoPayload'
+    return log + ' ' + str(msg.payload)
 
 # Alert summarizers
 

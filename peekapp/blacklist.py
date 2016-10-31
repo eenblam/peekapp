@@ -48,15 +48,18 @@ class Blacklist(object):
         return None
 
     def filter_by_signatures(self, pkt):
-        try:
-            payload = pkt[Raw].load
-        except IndexError, AttributeError:
-            payload = NoPayload()
+        if pkt.haslayer(TCP):
+            payload = str(pkt[TCP])
+        elif pkt.haslayer(UDP):
+            payload = str(pkt[UDP])
+        else:
+            return
 
         for signature in self.signatures:
             if signature in payload:
                 return classify_pkt(pkt, 'ILLEGAL_SIGNATURE',
-                        payload=payload, rule=rule)
+                        payload=payload.encode('string_escape'),
+                        rule=signature.encode('string_escape'))
         return None
 
     def filter_by_URL(self, pkt):

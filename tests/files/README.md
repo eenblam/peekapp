@@ -11,7 +11,7 @@ IP addresses (count):
 - 104.16.108.18 (3)
 - 10.0.0.16 (319, all)
 
-## `hack_ips.cfg`
+### `hack_ips.cfg`
 Contains the following IP addresses to filter from `hack_urls.pcap`:
 
 - 151.101.1.69
@@ -19,7 +19,7 @@ Contains the following IP addresses to filter from `hack_urls.pcap`:
 
 (Should total to 153 packets)
 
-## `hack_url_rules.cfg`
+### `hack_url_rules.cfg`
 URL rules for analysis of `hack.pcap`.
 Should match how-to-hack before hack.
 
@@ -42,6 +42,14 @@ IP addresses:
 - 10.0.0.1
 - 127.0.0.1
 
-## `icanhazip.cfg`
+### `icanhazip.cfg`
 Contains only the domain `icanhazip.com`.
 
+## `both.pcap`
+...is just the concatenation of `icanhazip_or_pytest.pcap`
+and `hack.pcap` via Scapy:
+
+```python
+# sniff as ican and hack, respectively
+wrpcap("tests/files/both.pcap", ican + hack)
+```

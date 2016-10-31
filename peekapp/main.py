@@ -31,8 +31,9 @@ def main(blacklist, logfile):
         source > bad_http_payload > fork
 
     if blacklist.signatures:
-        bad_payload_signatures = Pipe(filter=filters.has_transport_payload,
-                transform=blacklist.filter_by_signatures)
+        #bad_payload_signatures = Pipe(filter=filters.has_transport_payload,
+        #        transform=blacklist.filter_by_signatures)
+        bad_payload_signatures = Pipe(transform=blacklist.filter_by_signatures)
         source > bad_payload_signatures > fork
 
     #TODO All of port scan detection

@@ -1,6 +1,7 @@
 # peekapp/filters.py
 
 from scapy.all import DNSQR, DNSRR
+from peekapp.util import validate_payload
 
 def with_layers(*layers):
     """Accept packet if it has any of the listed layers"""

@@ -33,3 +33,13 @@ def url_pipeline():
     bad_urls = Pipe(transform=blacklist.filter_by_URL)
     source > bad_urls
     return source, bad_urls
+
+@pytest.fixture
+def signature_pipeline():
+    with open('tests/files/signatures.cfg','r') as signatures:
+        blacklist = Blacklist(signature_file=signatures)
+
+    source = Source()
+    bad_signatures = Pipe(transform=blacklist.filter_by_signatures)
+    source > bad_signatures
+    return source, bad_signatures
