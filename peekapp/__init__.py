@@ -21,9 +21,10 @@ from peekapp.pipes import *
         help='Output file to which logged packets are appended')
 @click.option('--alert-timeout', '-a', default=5, type=float,
         help='Minutes to wait before summarizing redundant alerts')
+@click.option('--port-scan', '-p', is_flag=True)
 @click.pass_context
-def cli(ctx, domain_blacklist, url_blacklist,
-        ip_blacklist, signatures, logfile, alert_timeout):
+def cli(ctx, domain_blacklist, url_blacklist, ip_blacklist, signatures,
+        logfile, alert_timeout, port_scan):
     """
     peekapp is a packet-monitoring IDS layer.
     """
@@ -39,6 +40,7 @@ def cli(ctx, domain_blacklist, url_blacklist,
 
     ctx.obj['logfile'] = logfile
     ctx.obj['alert_timeout'] = alert_timeout
+    ctx.obj['port_scan'] = port_scan
 
 from peekapp.interface import *
 

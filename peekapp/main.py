@@ -1,9 +1,10 @@
 import click
 from peekapp import loggify, filters, summarize_pretty
+from peekapp import portscan
 from peekapp.pipes import *
 from peekapp.alerts import *
 
-def main(blacklist, logfile, alert_timeout):
+def main(blacklist, logfile, alert_timeout, port_scan):
     # Plumbing
     source = Source()
     fork = Pipe()
@@ -31,15 +32,14 @@ def main(blacklist, logfile, alert_timeout):
         source > bad_http_payload > fork
 
     if blacklist.signatures:
-        #bad_payload_signatures = Pipe(filter=filters.has_transport_payload,
-        #        transform=blacklist.filter_by_signatures)
         bad_payload_signatures = Pipe(transform=blacklist.filter_by_signatures)
         source > bad_payload_signatures > fork
 
-    #TODO All of port scan detection
-    #port_scan_detector = PortScanBuffer()
-    #source > port_scan_detector > fork
+    if port_scan:
+        syn_pkts = Pipe(transform=portscan.filter_by_TCP_syn)
+        #TODO Set up Click options for PS timeout and tolerance
+        port_scan_scanner = portscan.PSBuffer()
+        ps_summarizer = Pipe(transform=portscan.aggregate_pscache)
+        source > syn_pkts > port_scan_scanner > ps_summarizer > fork
 
     return source
-
-

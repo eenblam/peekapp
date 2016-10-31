@@ -50,6 +50,9 @@ sudo `which python` peekapp.py -l out.log -d bad_domains.cfg -s sketchy_signatur
 
 # Static analysis is a bit less complicated
 peekapp -l out.log -i ips_that_should_be_reserved.cfg pcap oldtraffic.pcap
+
+# Port scan detection on network interface
+sudo `which peekapp` -p -l out.log iface eth0
 ```
 
 ### Configuration
@@ -166,7 +169,21 @@ would be more appropriate.
 A parameterizable map-reduce (or, split-apply-combine) strategy
 for summarizing static logs would make for a good feature addition.
 
-TODO Port scan limitations
+After the aforementioned complications,
+I started port scan detection very late on Sunday evening,
+so my implementation is remarkably naive...
+and, as of yet, untested.
+It watches for SYN stealth scans between any two devices,
+not just the host computer.
+Given a target packet count (tolerance) and a timeout length **t**,
+peekapp maintains a list of packets with timestamps occurring no more than
+**t** seconds prior to the timestamp of the latest packet.
+If a particular cache of packets exceeds the specified tolerance,
+the cache is bundled into a single record
+and merged with the other logs.
+Given this design, pcap makes the horrifying assumption that
+packets are arriving in order,
+as dropping this assumption would make for a much more complex computation.
 
 ### Testing
 To test the basic functionality of the application,
