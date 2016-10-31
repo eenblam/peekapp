@@ -10,7 +10,7 @@ peekapp will detect, log, and alert on:
 - [x] DNS requests for blacklisted domain names
 - [x] Unencrypted web traffic to URLs containing a set of blacklisted strings 
 - [x] TCP or UDP payloads containing any of a set of simple signatures
-- [] Network port scanning activity
+- [ ] Network port scanning activity
 
 TODO Describe extensibility
 (writing custom log formatters, alert summarizers, etc.)
