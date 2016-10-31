@@ -42,8 +42,13 @@ installation.
 
 Examples:
 ```bash
-peekapp -l out.log -d bad_domains.cfg -s sketchy_signatures.cfg iface wlan0
+# Execute peekapp with root privileges using installed executable
+sudo `which peekapp` -l out.log -d bad_domains.cfg -s sketchy_signatures.cfg iface wlan0
 
+# Execute included script using Python install of the current (non-root) user
+sudo `which python` peekapp.py -l out.log -d bad_domains.cfg -s sketchy_signatures.cfg iface wlan0
+
+# Static analysis is a bit less complicated
 peekapp -l out.log -i ips_that_should_be_reserved.cfg pcap oldtraffic.pcap
 ```
 
