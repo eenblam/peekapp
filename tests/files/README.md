@@ -19,6 +19,13 @@ Contains the following IP addresses to filter from `hack_urls.pcap`:
 
 (Should total to 153 packets)
 
+## `hack_url_rules.cfg`
+URL rules for analysis of `hack.pcap`.
+Should match how-to-hack before hack.
+
+- how-to-hack (1)
+- hack (5, due to order. Matches 6.)
+ 
 ## `icanhazip_or_pytest.pcap`
 - 364 UDP packets, all with DNSQR layer
 - 182 of the 364 do not have DNSRR layer

@@ -27,8 +27,8 @@ def main(blacklist, logfile):
         source > bad_ips > fork
 
     if blacklist.URLs:
-        bad_http_payload= Pipe()
-        #source > bad_http_payload > fork
+        bad_http_payload = Pipe(transform=blacklist.filter_by_URL)
+        source > bad_http_payload > fork
 
     if blacklist.signatures:
         bad_payload_signatures = Pipe(filter=filters.has_transport_payload,

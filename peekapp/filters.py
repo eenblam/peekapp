@@ -34,10 +34,8 @@ def is_TCP_UDP(pkt):
     return pkt.haslayer(TCP) or pkt.haslayer(UDP)
 
 def has_transport_payload(pkt):
-    #TODO Check not isinstance(pkt[2].payload, scapy.packet.NoPayload)
     try:
         return validate_payload(pkt[2].payload)
-        return not isinstance(pkt[2].payload, scapy.packet.NoPayload)
     except IndexError, AttributeError:
         # No transport layer!
         return False

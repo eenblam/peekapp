@@ -23,3 +23,13 @@ def ip_pipeline():
     bad_ips = Pipe(transform=blacklist.filter_by_IP)
     source > bad_ips
     return source, bad_ips
+
+@pytest.fixture
+def url_pipeline():
+    with open('tests/files/hack_url_rules.cfg','r') as url_rules:
+        blacklist = Blacklist(URL_file=url_rules)
+
+    source = Source()
+    bad_urls = Pipe(transform=blacklist.filter_by_URL)
+    source > bad_urls
+    return source, bad_urls

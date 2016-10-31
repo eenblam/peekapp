@@ -49,8 +49,8 @@ class Blacklist(object):
 
     def filter_by_signatures(self, pkt):
         try:
-            payload = pkt[TCP].payload.load
-        except IndexError:
+            payload = pkt[Raw].load
+        except IndexError, AttributeError:
             payload = NoPayload()
 
         for signature in self.signatures:
@@ -61,9 +61,27 @@ class Blacklist(object):
 
     def filter_by_URL(self, pkt):
         # Assume unencrypted HTTP packet
-        #TODO
-        if match:
-            return classify_pkt(pkt, 'ILLEGAL_URL', rule=rule)
+        try:
+            raw_load = pkt.payload.load
+        except AttributeError:
+            return
+
+        first = raw_load.split('\r\n')[0].strip()
+
+        try:
+            # RFC2616
+            # https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5
+            method, identifier, version = first.split()
+        except ValueError:
+            # Wrong number of values to unpack; mal-formed HTTP at best
+            return
+
+        if method in ['GET', 'HEAD', 'POST', 'PUT',
+                'OPTIONS', 'DELETE', 'TRACE', 'CONNECT']:
+            for rule in self.URLs:
+                if rule in identifier:
+                    return classify_pkt(pkt, 'ILLEGAL_URL',
+                            payload=identifier, rule=rule)
         return None
 
     def filter_by_IP(self, pkt):

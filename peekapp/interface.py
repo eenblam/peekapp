@@ -7,14 +7,12 @@ from peekapp import cli
 from peekapp.main import main
 
 @cli.command()
-@click.argument('packets', type=click.File('rb'))
+@click.argument('packets', type=click.File('r'))
 @click.pass_context
 def pcap(ctx, packets):
     """
     Perform static analysis on a PCAP dump
     """
-
-    #filename = packets.name
     source = main(blacklist=ctx.obj['blacklist'],
             logfile=ctx.obj['logfile'])
     try:
