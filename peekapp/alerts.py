@@ -4,7 +4,7 @@ from peekapp.pipes import *
 
 class AlertBuffer(object):
     """Probably not what you want. See PacketBuffer."""
-    def __init__(self, msg, timeout=5):
+    def __init__(self, msg, timeout=300):
         self.previous = msg
 
         self.timeout = timeout

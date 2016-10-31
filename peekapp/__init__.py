@@ -19,9 +19,11 @@ from peekapp.pipes import *
         help='File listing TCP/UDP payload signatures')
 @click.option('--logfile', '-l', type=click.File('a'),
         help='Output file to which logged packets are appended')
+@click.option('--alert-timeout', '-a', default=5, type=float,
+        help='Minutes to wait before summarizing redundant alerts')
 @click.pass_context
 def cli(ctx, domain_blacklist, url_blacklist,
-        ip_blacklist, signatures, logfile):
+        ip_blacklist, signatures, logfile, alert_timeout):
     """
     peekapp is a packet-monitoring IDS layer.
     """
@@ -36,6 +38,7 @@ def cli(ctx, domain_blacklist, url_blacklist,
                             signature_file=signatures)
 
     ctx.obj['logfile'] = logfile
+    ctx.obj['alert_timeout'] = alert_timeout
 
 from peekapp.interface import *
 

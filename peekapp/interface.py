@@ -14,7 +14,8 @@ def pcap(ctx, packets):
     Perform static analysis on a PCAP dump
     """
     source = main(blacklist=ctx.obj['blacklist'],
-            logfile=ctx.obj['logfile'])
+            logfile=ctx.obj['logfile'],
+            alert_timeout=ctx.obj['alert_timeout'])
     try:
         sniff(offline=packets, prn=source.push)
     except KeyboardInterrupt:
@@ -42,7 +43,8 @@ def iface(ctx, interface):
         sys.exit(1)
 
     source = main(blacklist=ctx.obj['blacklist'],
-            logfile=ctx.obj['logfile'])
+            logfile=ctx.obj['logfile'],
+            alert_timeout=ctx.obj['alert_timeout'])
     try:
         # For some reason, click calls this function a second time...
         # ...but with interface as <type 'unicode'>...

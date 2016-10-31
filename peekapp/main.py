@@ -3,13 +3,13 @@ from peekapp import loggify, filters, summarize_pretty
 from peekapp.pipes import *
 from peekapp.alerts import *
 
-def main(blacklist, logfile):
+def main(blacklist, logfile, alert_timeout):
     # Plumbing
     source = Source()
     fork = Pipe()
     log_formatter = Pipe(transform=lambda log: loggify(log) + '\n')
     log_sink = LogSink(logfile=logfile)
-    alert_pool = PacketBuffer(timeout=0.5)
+    alert_pool = PacketBuffer(timeout=alert_timeout)
     alert_formatter = Pipe(transform=summarize_pretty)
     alert_sink = Sink(click.echo)
 
