@@ -70,7 +70,32 @@ in part out of familiarity.
 I also don't mind the great fixture support, test discovery,
 and relative lack of boilerplate code.
 
+The official Scapy documentation is somewhat scarce,
+so I started reading help files from within an interactive session.
+When I found that many classes and methods were undocumented,
+I decided to just dive into the project's source.
+I was greatly rewarded.
+Although most of the code I found was devoid of docstrings and other comments,
+the code itself was very readable and served as my primary reference.
+
+When I came across Scapy's `pipetool` and `scapypipes` modules,
+I was confused.
+The classes in `pipetool`, along with its one test function,
+suggested exactly the system I had sketched out when I received the assignment.
+The `_ConnectorLogic` class provides a very simple DSL for defining
+a push-based traffic-analysis program as a directed acyclic graph.
+However, neither file had been updated in years,
+no other file in the project imported them,
+and no issues mentioned them.
+
+
 ### Difficulties
+I decided on using both `scapy.pipetool` and Click prior to having
+much in the way of working code or tests.
+I spent a good bit of time drafting the skeleton of the application
+and reading Scapy's source code before I had a minimally testable product.
+When I did, I found that something was profoundly wrong.
+
 For some reason, Click sent the `interface` argument to `sniff`
 multiple times when calling `peekapp.interface.iface`.
 The first time, `interface` was passed - correctly - as a string.
@@ -156,3 +181,14 @@ TODO Stress testing / testing under load
 
 ## Conclusion
 TODO
+
+## Works Cited
+[The official Scapy HTML tutorial](secdev.org/projects/scapy/doc) taught me that `sniff` is a thing.
+
+The "secret" (and presumably deprecated) [Scapy PDF documentation](secdev.org/projects/scapy/files/scapydoc.pdf) taught me that `wrpcap` exists, although it appears in the HTML tutorial as well.
+
+[Scapy on GitHub](github.com/secdev/scapy)
+
+[Click documentation](click.pocoo.org)
+
+[PyTest documentation](docs.pytest.org)
