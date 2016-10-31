@@ -58,8 +58,8 @@ with the exception of port scan detection
 
 Note that arbitrary byte sequences may be used when specifying
 a configuration file listing payload signatures.
-Nonprintable characters must be specified via their two-digit hex encoding,
-and must comply with Python specification PEP 223.
+Non-character bytes must be specified via their two-digit hex encoding,
+the format of which must comply with Python specification PEP 223.
 In short, record the two-digit hex number `HH` as `\xHH`.
 
 ## Report
