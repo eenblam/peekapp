@@ -17,16 +17,17 @@ from peekapp.pipes import *
         help='File listing IPs for which any traffic should trigger an alert')
 @click.option('--signatures', '-s', type=click.File('r'),
         help='File listing TCP/UDP payload signatures')
-@click.option('--logfile', '-l', type=click.File('a'))
+@click.option('--logfile', '-l', type=click.File('a'),
+        help='Output file to which logged packets are appended')
 @click.pass_context
 def cli(ctx, domain_blacklist, url_blacklist,
         ip_blacklist, signatures, logfile):
     """
-    peekapp is a packet-monitoring IDS layer, which records traffic in logfile.
+    peekapp is a packet-monitoring IDS layer.
     """
     if not logfile:
         import sys
-        click.echo('No logfile. See "peekapp -h" for options and arguments.')
+        click.echo('No logfile. See "peekapp --help" for options and arguments.')
         sys.exit(1)
 
     ctx.obj['blacklist'] = Blacklist(domain_file=domain_blacklist,
