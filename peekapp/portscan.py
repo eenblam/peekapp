@@ -94,7 +94,7 @@ class PSBuffer(Pipe):
             self.cache[key].append(msg)
         except ValueError:
             # Likely that timestamp is off
-            continue
+            pass
         except KeyError:
             self.cache[key] = PSCache(msg=msg,
                     timeout=self.timeout,
