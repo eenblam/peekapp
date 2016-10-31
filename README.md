@@ -74,14 +74,12 @@ Hence, I chose the easy route and went with Python and Scapy.
 I also used a couple of third-party libraries to ease
 the development of the CLI and the test suite.
 I opted for the Click module,
-instead of the `argparse` module that ships with Python,
+instead of the `argparse` module in Python's standard library,
 due to personal familiarity with Click.
 It's treated me well in the past, and I still recommend it,
 but this choice really hurt me, as I describe below.
 Similarly, I went with PyTest instead of the stock Python choice, UnitTest,
-in part out of familiarity.
-I also don't mind the great fixture support, test discovery,
-and relative lack of boilerplate code.
+out of familiarity and because it allows for short, clear tests.
 
 The official Scapy documentation is somewhat scarce,
 so I started reading help files from within an interactive session.
@@ -101,13 +99,13 @@ However, neither file had been updated in years,
 no other file in the project imported them,
 and no issues mentioned them.
 
-
 ### Difficulties
 I decided on using both `scapy.pipetool` and Click prior to having
 much in the way of working code or tests.
-I spent a good bit of time drafting the skeleton of the application
+I spent a number of hours drafting the skeleton of the application
 and reading Scapy's source code before I had a minimally testable product.
-When I did, I found that something was profoundly wrong.
+When I finally reached that point late Wednesday night,
+I found that something was very wrong.
 
 For some reason, Click sent the `interface` argument to `sniff`
 multiple times when calling `peekapp.interface.iface`.
@@ -130,14 +128,14 @@ and was faced with the same error message.
 I was finally able to debug what was happening in `scapy.arch.common.get_if`,
 link it back to Click, and move on.
 
-At this point, it was past noon on Saturday,
-and I'd been at an impasse since Wednesday night.
+At this point, it was Saturday afternoon,
+and I'd been at an impasse for three days.
 I decided to keep my own pipes module
 both for the sake of time
 and to avoid debugging around PipeEngine's threads.
 I would enjoy forking the project at a later date
 to again try using `scapy.pipetool`,
-but doing so would require a substantial rewrite of several components,
+but doing so would require a rewrite of several components,
 such as `peekapp.alerts`.
 
 Despite getting an early start (see git logs,)
@@ -181,9 +179,10 @@ peekapp maintains a list of packets with timestamps occurring no more than
 If a particular cache of packets exceeds the specified tolerance,
 the cache is bundled into a single record
 and merged with the other logs.
-Given this design, pcap makes the horrifying assumption that
+Given this design, peekapp makes the horrifying assumption that
 packets are arriving in order,
-as dropping this assumption would make for a much more complex computation.
+as dropping this assumption would make for a more complex computation
+or a more involved design.
 
 ### Testing
 To test the basic functionality of the application,
@@ -194,7 +193,8 @@ checking for UDP packets bound for a small number of websites.
 Once I was ready to add additional features,
 I implemented a small number of functional tests for regression detection
 using the PyTest module.
-Each feature is tested against a PCAP file I produced using Wireshark.
+Each feature (excepted port scan detection) is tested against a PCAP file
+I produced using Wireshark.
 Having prior knowledge of the features of each file produced
 (documented in `peekapp/tests/files/README.md`,)
 I was able to produce explicit tests.
@@ -204,10 +204,11 @@ with the provided traffic rule(s).
 After installation, the test suite can be run from
 the topmost source directory via `python setup.py test`.
 
-TODO Stress testing / testing under load
-
-## Conclusion
-TODO
+As of yet, I have done no testing under significant loads,
+nor have I tested peekapp's port scan detection.
+Instead of building a virtual machine for this purpose,
+my original plan was to simply deploy to a Digital Ocean server
+and provide external traffic via Scapy from my workstation.
 
 ## Works Cited
 [The official Scapy HTML tutorial](secdev.org/projects/scapy/doc) taught me that `sniff` is a thing.
