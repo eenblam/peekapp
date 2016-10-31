@@ -164,7 +164,7 @@ Hence, it is ill-suited for static analysis of a PCAP file
 via the `pcap` command.
 A stateless aggregation strategy of all packets within the file
 would be more appropriate.
-A parameterizable map-reduce (or, split-apply-combine) strategy
+A parameterizable split-apply-combine strategy
 for summarizing static logs would make for a good feature addition.
 
 After the aforementioned complications,
